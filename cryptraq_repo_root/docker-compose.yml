@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  relay:
+    build: .
+    image: cryptraq:latest
+    container_name: cryptraq-relay
+    command: uvicorn cryptraq.relay_server:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - CRYPTRAQ_ADMIN_USER=${CRYPTRAQ_ADMIN_USER:-mirudula}
+      - CRYPTRAQ_ADMIN_PASSWORD=${CRYPTRAQ_ADMIN_PASSWORD:?set a real admin password in .env}
+      - CRYPTRAQ_DB_PATH=/data/cryptraq_relay.db
+    volumes:
+      - cryptraq_data:/data
+    restart: unless-stopped
+
+  sender:
+    build: .
+    image: cryptraq:latest
+    container_name: cryptraq-sender
+    command: streamlit run cryptraq/sender_app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - RELAY_URL=http://relay:8000
+      - CRYPTRAQ_ADMIN_USER=${CRYPTRAQ_ADMIN_USER:-mirudula}
+      - CRYPTRAQ_ADMIN_PASSWORD=${CRYPTRAQ_ADMIN_PASSWORD:?set a real admin password in .env}
+      - CRYPTRAQ_DB_PATH=/data/cryptraq_relay.db
+    volumes:
+      - cryptraq_data:/data
+    depends_on:
+      - relay
+    restart: unless-stopped
+
+  receiver:
+    build: .
+    image: cryptraq:latest
+    container_name: cryptraq-receiver
+    command: streamlit run cryptraq/receiver_app.py --server.port 8502 --server.address 0.0.0.0
+    ports:
+      - "8502:8502"
+    environment:
+      - RELAY_URL=http://relay:8000
+      - CRYPTRAQ_ADMIN_USER=${CRYPTRAQ_ADMIN_USER:-mirudula}
+      - CRYPTRAQ_ADMIN_PASSWORD=${CRYPTRAQ_ADMIN_PASSWORD:?set a real admin password in .env}
+      - CRYPTRAQ_DB_PATH=/data/cryptraq_relay.db
+    volumes:
+      - cryptraq_data:/data
+    depends_on:
+      - relay
+    restart: unless-stopped
+
+volumes:
+  cryptraq_data:
