@@ -1,0 +1,17 @@
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+pydantic>=2.0.0
+streamlit>=1.30.0
+requests>=2.31.0
+pillow>=9.5.0
+numpy>=1.24.0
+cryptography>=41.0.0
+pikepdf>=7.0.0
+fpdf2>=2.7.0
+PyMuPDF>=1.22.0
+streamlit-mic-recorder>=0.0.8
+qrcode>=7.4.2
+qiskit>=1.0.0
+qiskit-aer>=0.13.0
+opencv-python-headless>=4.7.0.72
+bcrypt>=4.0.1

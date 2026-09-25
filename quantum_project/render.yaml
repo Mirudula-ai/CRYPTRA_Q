@@ -1,0 +1,40 @@
+services:
+  # 1. CryptraQ Relay Node (FastAPI Backend)
+  - type: web
+    name: cryptraq-relay
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn cryptraq.relay_server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: CRYPTRAQ_ADMIN_USER
+        value: mirudula
+      - key: CRYPTRAQ_ADMIN_PASSWORD
+        value: CryptraQ@SecureDefault!2026
+
+  # 2. CryptraQ Sender Node (Streamlit App)
+  - type: web
+    name: cryptraq-sender
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run cryptraq/sender_app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: RELAY_URL
+        fromService:
+          type: web
+          name: cryptraq-relay
+          property: host
+
+  # 3. CryptraQ Receiver Node (Streamlit App)
+  - type: web
+    name: cryptraq-receiver
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run cryptraq/receiver_app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: RELAY_URL
+        fromService:
+          type: web
+          name: cryptraq-relay
+          property: host
